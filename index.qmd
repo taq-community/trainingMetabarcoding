@@ -1,0 +1,22 @@
+---
+title: How to make your scientific code accessible and reproducible?
+subtitle: Using Git and Github
+format:
+  clean-revealjs:
+    self-contained: true
+html-math-method:
+  method: mathjax
+  url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+author:
+  - name: Steve Vissault
+    orcid: 0000-0002-0866-4376
+    email: steve.vissault@inrs.ca
+    affiliations: Institut National de la Recherche Scientifique
+date: last-modified
+code-copy: true
+---
+
+# Who am I? {background-color="#40666e"}
+
+
+

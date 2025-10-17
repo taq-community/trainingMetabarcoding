@@ -1,1 +1,3 @@
-# training_metabarcoding
+# Une introduction à BARQUE
+
+
