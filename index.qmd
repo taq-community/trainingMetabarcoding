@@ -1,22 +1,449 @@
 ---
-title: How to make your scientific code accessible and reproducible?
-subtitle: Using Git and Github
+title: Formation au métabarcoding avec BARQUE
+subtitle: De l'assurance qualité à l'assignation taxonomique
 format:
-  clean-revealjs:
+  revealjs:
     self-contained: true
-html-math-method:
-  method: mathjax
-  url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    logo: img/logo.png
+    css: style.css
+    highlight-style: dracula
 author:
   - name: Steve Vissault
     orcid: 0000-0002-0866-4376
     email: steve.vissault@inrs.ca
-    affiliations: Institut National de la Recherche Scientifique
+    affiliations: Institut National de la Recherche Scientifique (INRS)
 date: last-modified
 code-copy: true
 ---
 
-# Who am I? {background-color="#40666e"}
+# Introduction
+
+## Objectifs de la formation
+
+:::{.incremental}
+1. **Comprendre le séquençage Illumina** et les fichiers FASTQ
+2. **Manipuler des données de séquençage** avec R
+3. **Découvrir BARQUE**, un pipeline de métabarcoding québécois
+4. **Appliquer les concepts** sur des exemples pratiques
+:::
+
+---
+
+## Introduction 
+
+- TODO: Mettre le diagramme de Tuan (lui demander)
+
+---
+
+## Comment le séquencage s'opère?
+
+:::: {.columns}
+
+::: {.column width="35%"}
+![Crédit: J. Couillard](img/illumina.jpeg)
+:::
+
+::: {.column width="65%"}
+![DOI: 10.1016/B978-0-12-802234-4.00002-1](img/sequencing.jpg)
+:::
+
+::::  
+
+---
+
+## Comment le séquencage s'opère?
+
+:::: {.columns}
+::: {.column width="35%"}
+:::{.callout-note}
+- Chaque nucléotide à un fluorophore spécifique (4 canaux). 
+- Certains appareils (ex. NextSeq) vont utiliser deux canaux car c'est plus rapide et moins coûteux. 
+:::
+:::
+::: {.column width="65%"}
+![DOI: 10.1016/B978-0-12-802234-4.00002-1](img/sequencing.jpg)
+:::
+::::
+
+Le signal renvoyé par le laser est traduit en chromatographe pour chaque amplicon séquencé.
 
 
+---
+
+## Comment le séquencage est effectué?
+
+### Exemple de chromatographe
+
+![Source: LabXchange.org](img/labxchange-1.png)
+
+
+---
+
+## Comment le séquencage est effectué?
+
+### Exemple de chromatographe
+
+![Source: wikipedia.org](img/Phred_Figure_1_cropped.jpg)
+
+
+# Les fichiers FASTQ
+Les sortie du séquenceur Illumina 
+
+---
+
+## Fichiers de sortie du séquenceur Illumina
+
+Exemple de nom de fichier sortie du séquenceur Illumina: `sample1_1_L001_R1_001.fastq.gz`
+ 
+. . .
+
+|             | Signification                | Exemple              |
+|-------------|------------------------------|----------------------|
+| **sample1** | Identifiant de l'échantillon | sample1, sample2     |
+| **\_1**     | Numéro de réplicat           | 1, 2, 3...           |
+| **L001**    | Numéro de ligne / lane:      | L001-L008            |
+| **R1/R2**   | Direction de lecture         | R1=avant, R2=arrière |
+| **001**     | Segment de fichier           | 001, 002...          |
+
+. . .
+
+:::{.callout-note}
+- **Séquençage paired-end** = fichiers R1 + R2 pour chaque échantillon avec l'ensemble des amplicons.
+- **Numéro de Ligne ou *lane*** =  Une flowcell Illumina est divisée en plusieurs voies physiques parallèles où le séquençage se déroule simultanément.
+:::
+
+---
+
+## Structure du fichier FASTQ
+
+Contient plusieurs lignes dont **un ensemble de 4 lignes correspond à un amplicon**.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| results: markup
+gzfile("data/ST1_S17_L001_R1_001.fastq.gz") |> readLines(n = 12)
+```
+
+---
+
+## Structure du fichier FASTQ
+
+```{r}
+#| echo: true
+gzfile("data/ST1_S17_L001_R1_001.fastq.gz") |> readLines(n = 4)
+```
+
+:::{.incremental}
+1. **Ligne [1]** : Identifiant de séquence (commence par `@`)
+2. **Ligne [2]** : Séquence d'ADN (A, T, G, C) de l'amplicon
+3. **Ligne [3]** : Séparateur (`+`)
+4. **Ligne [4]** : Scores de qualité (un par base)
+:::
+
+
+---
+
+## Ligne d'identification
+
+Décomposition de l'identifiant
+
+```
+@SH00321:6:BWR98207-2813:1:1101:1065:1015 1:N:0:AACCATAGAA+GGCGAGATGG
+```
+
+- **SH00321** : ID de l'instrument
+- **6** : Numéro d'exécution
+- **BWR98207-2813** : ID de la flowcell
+- **1:1101:1065:1015** : Tuile et coordonnées X:Y
+- **1:N:0** : Numéro de lecture, flag de filtre, bits de contrôle
+- **AACCATAGAA+GGCGAGATGG** : Codes-barres d'échantillon (double indexation)
+
+::: {.notes}
+Ce sont les codes-barres (barcodes/index) utilisés pour identifier l'échantillon, pas pour amplifier l'ADN.
+:::
+
+---
+
+## Interprétation des scores de qualité
+
+
+Exemple de chaine de caractères donnant le score de qualité (1 caractère par nucléotide): `GGGGGGGGGGGGGGGGGGGGGGGG9GG-G9G9G9GGGG`
+
+
+| Caractère ASCII | Score Phred | Taux d'erreur | Précision |
+|:---------------:|:-----------:|:-------------:|:---------:|
+|       `G`       |     38      |    0,016%     |  99,984%  |
+|       `9`       |     24      |     0,40%     |  99,60%   |
+|       `-`       |     12      |     6,31%     |  93,69%   |
+
+:::{.callout-tip}
+**Règle générale** : Q30 ou plus = haute qualité (99,9% de précision)
+:::
+
+
+---
+
+## Scores de qualité du séquencage
+
+Les scores de qualité utilisent l'encodage ASCII.
+
+```
+ Quality encoding: !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHI
+                   |         |         |         |         |
+    Quality score: 0........10........20........30........40   
+```
+
+## Scores de qualité du séquencage
+
+Avec R, comment convertir l'encodage ASCII en score de Phred et en probabilité d'obtenir une erreur (précision)?
+
+```{r}
+#| echo: true
+#| output-location: slide
+# Convertir la chaîne de qualité en scores Phred
+quality_string <- "GGGGGGG99GG-GGG"
+quality_scores <- as.integer(charToRaw(quality_string)) - 33
+
+# Afficher la correspondance
+data.frame(
+  Caractere = strsplit(quality_string, "")[[1]],
+  Score_Phred = quality_scores,
+  Precision = paste0(round((10^(-quality_scores/10)) * 100, 2), "%")
+)
+```
+
+# Manipuler des fichiers FASTQ
+
+## Lire un fichier FASTQ avec R
+
+```{r}
+#| echo: true
+
+# Lire le fichier FASTQ
+fq <- ShortRead::readFastq("data/ST1_S17_L001_R1_001.fastq.gz")
+
+# Examiner la structure
+fq
+```
+
+---
+
+## Extraire les informations principales
+
+```{r}
+#| echo: true
+
+# Nombre d'amplicons
+length(fq)
+
+# Extraire les amplicons
+sequences <- ShortRead::sread(fq)
+
+# Extraire les identifiants
+ids <- ShortRead::id(fq)
+
+# Extraire les scores de qualité
+qualities <- Biostrings::quality(fq)
+
+# Premier identifiant et séquence
+ids[1]
+sequences[1]
+```
+
+---
+
+## Résumé statistique d'un fichier FASTQ
+
+```{r}
+#| echo: true
+
+# Longueur des séquences
+seq_lengths <- Biostrings::width(sequences)
+summary(seq_lengths)
+
+# Distribution des scores de qualité
+qual_matrix <- as(qualities, "matrix")
+mean_quality <- rowMeans(qual_matrix)
+summary(mean_quality)
+
+# Composition en bases
+Biostrings::alphabetFrequency(sequences, as.prob = TRUE)[1:4, 1:4]
+```
+
+---
+
+## Assurance qualité avec la librairie `Rqc`
+
+```{r}
+#| echo: true
+#| cache: true
+
+fq_files <- list.files("data", full.names = TRUE, pattern = "ST")[1:4]
+qa <- Rqc::rqcQA(fq_files)
+Rqc::rqcCycleQualityPlot(qa)
+```
+
+---
+
+## Analyser la qualité du séquencage
+
+Pourquoi le score décroit au fur et à mesure des itérations?
+
+---
+
+## Points clés à retenir
+
+:::{.incremental}
+- **FASTQ** = format standard pour les données de séquençage
+- **4 lignes par lecture d'amplicon** : ID, séquence, séparateur, qualité
+- **Paired-end** : les fichiers R1 et R2 contiennent des paires appariées
+- **Scores de qualité** : Plus élevé = meilleur (viser Q30+)
+- **La qualité se dégrade** vers la fin des lectures (normal)
+:::
+
+# BARQUE
+
+## Qu'est ce que BARQUE?
+
+- Qui est l'auteur de BARQUE
+- Position du pipeline dans la litterature
+- Made in Québec
+
+
+---
+
+## Qu'est ce que BARQUE?
+
+C'est un pipeline de traitement des données de séquencages
+
+
+---
+
+## Les grandes étapes de BARQUE 
+
+Diagramme des grandes étapes
+
+1. Vérification des fichiers d'entrée
+2. TRIM - Nettoyage/découpage des séquences
+3. MERGE - Fusion des lectures paired-end
+(R1 et R2)
+4. Split Amplicon - Séparation des amplicons
+ (TODO ASV vs OTUs)
+5. Retrait des chimères - Détection et
+suppression des séquences chimériques
+6. Assignement taxonomique - Attribution des
+ espèces 
+  
+
+---
+
+## Types de primer
+
+Test
+
+---
+
+## Espèces intégré à la base de données par PRIMER
+
+
+---
+
+## COI
+
+Aller chercher la base de données NCBI pour les primers COI
+
+
+--- 
+
+## Télécharger BARQUE
+
+Sur github
+
+
+---
+
+## Pourquoi utiliser docker
+
+BARQUE requière plusieurs programmes qui ne sont pas tous compatibles 
+
+---
+
+## Comment docker fonctionne avec -v 
+
+Mettre un schéma
+
+--- 
+
+## Étape 1. Télécharger l'image docker
+
+
+--
+
+## Étape 2. Execute l'image 
+
+
+---
+
+<!-- ## Structure du dossier contenant le programme 
+
+
+## 2. Assurance qualité des données de séquençage 
+
+- Fonctionnement du séquenceur Illumina
+- Structure d'un fichier fastQ
+- Manipulation des fichiers fastQ
+- Contrôle qualité des séquences obtenues
+
+## 3. Assignation taxonomique 
+
+- Comment fonctionne l'assignation d'espèces?
+- Étapes du pipeline BARQUE
+- Schéma des opérations sur l'amplicon
+
+## 4. Exemples pratiques 
+
+- Cas d'étude avec MiFish
+- Cas d'étude avec COI (dernière version)
+
+## 5. Outils BARQUE 
+
+- Application Shiny: Exécuter BARQUE
+- Génération de rapports de résultats
+
+# 1. Contexte de l'eDNA dans la recherche {background-color="#40666e"}
+
+## Ascension des données eDNA dans GBIF
+
+## Dans les publications scientifiques
+
+# 2. Assurance qualité des données {background-color="#40666e"}
+
+## Assurance qualité du séquenceur Illumina
+
+## Structure d'un fichier fastQ
+
+## Manipuler des fichiers fastQ
+
+## Assurance qualité sur les séquences obtenues
+
+# 3. Assignation taxonomique {background-color="#40666e"}
+
+## Assigner des espèces: comment ça fonctionne?
+
+## Étapes de BARQUE
+
+## Schéma des opérations sur l'amplicon
+
+# 4. Exemples pratiques {background-color="#40666e"}
+
+## 1. Voir avec MiFish
+
+## 2. Voir avec COI (dernière version)
+
+# 5. Outils BARQUE {background-color="#40666e"}
+
+## Application Shiny: Exécuter BARQUE
+
+## Rapport: Obtenir le rapport de résultats -->
 
