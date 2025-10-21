@@ -356,7 +356,14 @@ Rqc::rqcCycleQualityPlot(qa)
 - **La qualité se dégrade** vers la fin des lectures (normal)
 :::
 
-# BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
+# Traiter les amplicons séquencés avec BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
+
+---
+
+## Qu'est ce que BARQUE?
+### Un large éventail d'outils en bioinformatique
+
+![Hakimzadeh et al, 2024](img/Hakimzadeh_et_al_2024.png)
 
 ## Qu'est ce que BARQUE?
 
@@ -371,8 +378,6 @@ Rqc::rqcCycleQualityPlot(qa)
 - Il agit comme chef d'orchestre d'un ensemble de programme
 :::
 :::
-
-
 
 ---
 
@@ -421,7 +426,7 @@ suppression des séquences chimériques
 
 ## Les étapes en tant qu'utilisateur
 
-1. On place les fichiers `fastq.gz` avec la bonne nomenclature dans le dossier `` 
+1. On place les fichiers `fastq.gz` avec la bonne nomenclature dans le dossier
 2. 
 
 ---
@@ -441,19 +446,14 @@ Test
 
 Aller chercher la base de données NCBI pour les primers COI
 
-
---- 
-
-## Télécharger BARQUE
-
-Sur github
-
-
 ---
 
 ## Pourquoi utiliser docker
 
-BARQUE requière plusieurs programmes qui ne sont pas tous compatibles 
+BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'environnement Windows
+
+![Hakimzadeh et al, 2024](img/Hakimzadeh_et_al_2024-2.png)
+
 
 ---
 
