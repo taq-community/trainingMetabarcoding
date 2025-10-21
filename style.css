@@ -12,7 +12,8 @@
 .reveal h5,
 .reveal h6 {
     font-family: 'Cabin', sans-serif;
-    color: #2d2d2d;
+    font-weight: light;
+    color: #a8c5ed;
 }
 
 .reveal .slide figure>figcaption,
@@ -25,7 +26,6 @@
 
 .reveal {
     font-size: 28px;
-    color: #2d2d2d;
     font-family: 'Roboto Flex', sans-serif;
     font-weight: light;
     /* Taille par défaut est ~40px */
@@ -33,10 +33,8 @@
 
 .reveal pre code {
     font-size: 1em;
-    border: #2d2d2d;
 }
 
 .reveal code {
     font-size: 1em;
-    background-color: #2d2d2d;
 }

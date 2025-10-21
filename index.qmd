@@ -5,6 +5,7 @@ format:
   revealjs:
     self-contained: true
     logo: img/logo.png
+    theme: night
     css: style.css
     highlight-style: dracula
 author:
@@ -15,8 +16,6 @@ author:
 date: last-modified
 code-copy: true
 ---
-
-# Introduction
 
 ## Objectifs de la formation
 
@@ -29,9 +28,31 @@ code-copy: true
 
 ---
 
+## Avant de commencer
+
+### Installation des librairies R requises
+
+1. Ouvrir RStudio 
+2. Envoyer les commandes suivantes dans la console
+
+```{r install-packages}
+#| echo: true
+#| eval: false
+
+# Installation des packages Bioconductor
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c("ShortRead", "Biostrings", "Rqc"))
+```
+
+# Introduction
+
+---
+
 ## Introduction 
 
-- TODO: Mettre le diagramme de Tuan (lui demander)
+![](img/diagram.png)
 
 ---
 
@@ -74,7 +95,7 @@ Le signal renvoyé par le laser est traduit en chromatographe pour chaque amplic
 
 ### Exemple de chromatographe
 
-![Source: LabXchange.org](img/labxchange-1.png)
+![Source: LabXchange.org](img/labxchange-1.jpg)
 
 
 ---
@@ -83,8 +104,22 @@ Le signal renvoyé par le laser est traduit en chromatographe pour chaque amplic
 
 ### Exemple de chromatographe
 
-![Source: wikipedia.org](img/Phred_Figure_1_cropped.jpg)
 
+:::: {.columns}
+::: {.column width="30%"}
+:::{.callout-important}
+Le score est basé sur:
+
+- La séparation entre les clusters (pureté du signal)
+- Le rapport signal/bruit
+- La distribution de l'intensités des 4 canaux
+- La position dans le read (la qualité diminue généralement vers la fin)
+:::
+:::
+::: {.column width="70%"}
+![Source: wikipedia.org](img/Phred_Figure_1_cropped.jpg)
+:::
+::::
 
 # Les fichiers FASTQ
 Les sortie du séquenceur Illumina 
@@ -118,20 +153,26 @@ Exemple de nom de fichier sortie du séquenceur Illumina: `sample1_1_L001_R1_001
 
 Contient plusieurs lignes dont **un ensemble de 4 lignes correspond à un amplicon**.
 
-```{r}
+```{r fastq-structure-12lines}
 #| echo: true
 #| output-location: fragment
 #| results: markup
-gzfile("data/ST1_S17_L001_R1_001.fastq.gz") |> readLines(n = 12)
+#| cache: true
+system.file(package="ShortRead", "extdata/E-MTAB-1147/ERR127302_1_subset.fastq.gz") |> 
+  gzfile() |> 
+  readLines(n = 12)
 ```
 
 ---
 
 ## Structure du fichier FASTQ
 
-```{r}
+```{r fastq-structure-4lines}
 #| echo: true
-gzfile("data/ST1_S17_L001_R1_001.fastq.gz") |> readLines(n = 4)
+#| cache: true
+system.file(package="ShortRead", "extdata/E-MTAB-1147/ERR127302_1_subset.fastq.gz") |> 
+  gzfile() |> 
+  readLines(n = 4)
 ```
 
 :::{.incremental}
@@ -198,9 +239,10 @@ Les scores de qualité utilisent l'encodage ASCII.
 
 Avec R, comment convertir l'encodage ASCII en score de Phred et en probabilité d'obtenir une erreur (précision)?
 
-```{r}
+```{r quality-conversion}
 #| echo: true
 #| output-location: slide
+#| cache: true
 # Convertir la chaîne de qualité en scores Phred
 quality_string <- "GGGGGGG99GG-GGG"
 quality_scores <- as.integer(charToRaw(quality_string)) - 33
@@ -215,13 +257,17 @@ data.frame(
 
 # Manipuler des fichiers FASTQ
 
+
+---
+
 ## Lire un fichier FASTQ avec R
 
-```{r}
+```{r read-fastq}
 #| echo: true
+#| cache: true
 
 # Lire le fichier FASTQ
-fq <- ShortRead::readFastq("data/ST1_S17_L001_R1_001.fastq.gz")
+fq <- system.file(package="ShortRead", "extdata/E-MTAB-1147/ERR127302_1_subset.fastq.gz") |> ShortRead::readFastq()
 
 # Examiner la structure
 fq
@@ -231,8 +277,9 @@ fq
 
 ## Extraire les informations principales
 
-```{r}
+```{r extract-info}
 #| echo: true
+#| cache: true
 
 # Nombre d'amplicons
 length(fq)
@@ -255,8 +302,9 @@ sequences[1]
 
 ## Résumé statistique d'un fichier FASTQ
 
-```{r}
+```{r fastq-summary}
 #| echo: true
+#| cache: true
 
 # Longueur des séquences
 seq_lengths <- Biostrings::width(sequences)
@@ -275,11 +323,11 @@ Biostrings::alphabetFrequency(sequences, as.prob = TRUE)[1:4, 1:4]
 
 ## Assurance qualité avec la librairie `Rqc`
 
-```{r}
+```{r quality-analysis-rqc}
 #| echo: true
 #| cache: true
 
-fq_files <- list.files("data", full.names = TRUE, pattern = "ST")[1:4]
+fq_files <- system.file(package="ShortRead", "extdata/E-MTAB-1147/") |> list.files(full.names = TRUE)
 qa <- Rqc::rqcQA(fq_files)
 Rqc::rqcCycleQualityPlot(qa)
 ```
