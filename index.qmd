@@ -1,13 +1,17 @@
 ---
 title: Formation au métabarcoding avec BARQUE
+title-slide-attributes:
+  data-background-image: img/bg.jpg
+  data-background-opacity: "0.2"
 subtitle: De l'assurance qualité à l'assignation taxonomique
 format:
   revealjs:
     self-contained: true
     logo: img/logo.png
-    theme: night
+    theme: dark
     css: style.css
     highlight-style: dracula
+    slide-number: true
 author:
   - name: Steve Vissault
     orcid: 0000-0002-0866-4376
@@ -46,17 +50,15 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install(c("ShortRead", "Biostrings", "Rqc"))
 ```
 
-# Introduction
+# Introduction {background-image="img/bg.jpg" background-opacity="0.3"}
 
----
-
-## Introduction 
+## Introduction
 
 ![](img/diagram.png)
 
 ---
 
-## Comment le séquencage s'opère?
+## Comment le séquencage est effectué?
 
 :::: {.columns}
 
@@ -72,7 +74,7 @@ BiocManager::install(c("ShortRead", "Biostrings", "Rqc"))
 
 ---
 
-## Comment le séquencage s'opère?
+## Comment le séquencage est effectué?
 
 :::: {.columns}
 ::: {.column width="35%"}
@@ -121,14 +123,14 @@ Le score est basé sur:
 :::
 ::::
 
-# Les fichiers FASTQ
+# Les fichiers FASTQ {background-image="img/bg.jpg" background-opacity="0.3"}
 Les sortie du séquenceur Illumina 
 
 ---
 
 ## Fichiers de sortie du séquenceur Illumina
 
-Exemple de nom de fichier sortie du séquenceur Illumina: `sample1_1_L001_R1_001.fastq.gz`
+Exemple de nomenclature de fichier de sortie du séquenceur Illumina: `sample1_1_L001_R1_001.fastq.gz`
  
 . . .
 
@@ -155,8 +157,6 @@ Contient plusieurs lignes dont **un ensemble de 4 lignes correspond à un amplic
 
 ```{r fastq-structure-12lines}
 #| echo: true
-#| output-location: fragment
-#| results: markup
 #| cache: true
 system.file(package="ShortRead", "extdata/E-MTAB-1147/ERR127302_1_subset.fastq.gz") |> 
   gzfile() |> 
@@ -255,7 +255,7 @@ data.frame(
 )
 ```
 
-# Manipuler des fichiers FASTQ
+# Manipuler des fichiers FASTQ {background-image="img/bg.jpg" background-opacity="0.3"}
 
 
 ---
@@ -336,7 +336,13 @@ Rqc::rqcCycleQualityPlot(qa)
 
 ## Analyser la qualité du séquencage
 
-Pourquoi le score décroit au fur et à mesure des itérations?
+### Pourquoi la qualité des lectures décroit au fur et à mesure des itérations?
+
+  1. Dégradation des fluorophores
+  2. Accumulation d'erreurs de phase, soit la désynchronisation des clusters
+  3. Épuisement des réactifs, compétition pour les nucléotides par exemple
+  4. Dommages à l'ADN par stress chimique par exemple
+  5. Accumulation de sous-produits (ex. Résidus de réaction s'accumulent)
 
 ---
 
@@ -344,45 +350,79 @@ Pourquoi le score décroit au fur et à mesure des itérations?
 
 :::{.incremental}
 - **FASTQ** = format standard pour les données de séquençage
-- **4 lignes par lecture d'amplicon** : ID, séquence, séparateur, qualité
-- **Paired-end** : les fichiers R1 et R2 contiennent des paires appariées
+- **4 lignes par lecture d'amplicon** : ID, lecture de l'amplicon, séparateur, qualité de la lecture
+- **Paired-end** : les fichiers R1 et R2 contiennent les lecture d'amplicons à apparier
 - **Scores de qualité** : Plus élevé = meilleur (viser Q30+)
 - **La qualité se dégrade** vers la fin des lectures (normal)
 :::
 
-# BARQUE
+# BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
 
 ## Qu'est ce que BARQUE?
 
-- Qui est l'auteur de BARQUE
-- Position du pipeline dans la litterature
-- Made in Québec
+:::: {.columns}
+::: {.column width="30%"}
+![](https://raw.githubusercontent.com/enormandeau/barque/master/00_archive/barque_small.png)
+:::
+::: {.column  width="70%"}
+- Programme écrit par Éric Normandeau (IBIS, ULaval)
+- Disponible sur [Github](https://github.com/enormandeau/barque) depuis 2017
+- C'est un pipeline de traitement de données de séquences 
+- Il agit comme chef d'orchestre d'un ensemble de programme
+:::
+:::
+
 
 
 ---
 
 ## Qu'est ce que BARQUE?
 
-C'est un pipeline de traitement des données de séquencages
-
+:::: {.columns}
+::: {.column  width="40%"}
+![Creative Commons](img/chef_d'orchestre.jpg)
+:::
+::: {.column  width="60%"}
+- **FLASH** v1.2.11+: fusion des lectures paired-end
+- **VSEARCH** v2.14.2+: outil d'analyse de séquences
+(version obligatoire)
+- **Trimmomatic**: outil de filtrage et découpage des
+  lectures 
+- **NCBI BLAST**: annotation des séquences
+non-correspondantes
+- Un ensemble de programmes **UNIX** comme `cut`, `sort`, `uniq` etc. qui manipulent des chaînes de caractères ou des nombres
+- **R** & **Pyhton**: Visualisation et synthèse des résultats
+:::
+:::
 
 ---
 
 ## Les grandes étapes de BARQUE 
 
-Diagramme des grandes étapes
-
-1. Vérification des fichiers d'entrée
+1. Vérification des fichiers des entrées dans le 
 2. TRIM - Nettoyage/découpage des séquences
 3. MERGE - Fusion des lectures paired-end
 (R1 et R2)
-4. Split Amplicon - Séparation des amplicons
+1. Split Amplicon - Séparation des amplicons
  (TODO ASV vs OTUs)
-5. Retrait des chimères - Détection et
+1. Retrait des chimères - Détection et
 suppression des séquences chimériques
-6. Assignement taxonomique - Attribution des
+1. Assignement taxonomique - Attribution des
  espèces 
-  
+
+--- 
+
+## Télécharger BARQUE
+### Pratique
+
+1. On se
+
+---
+
+## Les étapes en tant qu'utilisateur
+
+1. On place les fichiers `fastq.gz` avec la bonne nomenclature dans le dossier `` 
+2. 
 
 ---
 

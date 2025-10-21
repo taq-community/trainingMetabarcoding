@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
   push:
-    branches: main
+    branches: [ "main" ]
 
 name: Quarto Publish
 
@@ -24,7 +24,7 @@ jobs:
       
       - name: Install required R packages
         run: |
-          Rscript -e 'install.packages(c("rmarkdown", "BiocManager"))'
+          Rscript -e 'install.packages(c("BiocManager"))'
           Rscript -e 'BiocManager::install(c("ShortRead", "Biostrings", "Rqc"))'
 
       - name: Render and Publish

@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* Appliquer Cabin aux titres */
 .reveal h1, h2 {
     font-weight: bold;
     font-family: 'Cabin', sans-serif;
-    color: #2a76dd !important;
+    color: #3687f9 !important;
 }
 
 .reveal h3,
@@ -12,7 +12,7 @@
 .reveal h5,
 .reveal h6 {
     font-family: 'Cabin', sans-serif;
-    font-weight: light;
+    font-weight: 300;
     color: #a8c5ed;
 }
 
@@ -26,8 +26,8 @@
 
 .reveal {
     font-size: 28px;
-    font-family: 'Roboto Flex', sans-serif;
-    font-weight: light;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 200;
     /* Taille par défaut est ~40px */
 }
 
