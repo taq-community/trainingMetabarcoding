@@ -38,3 +38,7 @@
 .reveal code {
     font-size: 1em;
 }
+
+.reveal .slide-logo {
+    max-height: 6rem;
+}

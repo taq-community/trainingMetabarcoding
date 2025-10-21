@@ -338,11 +338,33 @@ Rqc::rqcCycleQualityPlot(qa)
 
 ### Pourquoi la qualité des lectures décroit au fur et à mesure des itérations?
 
+:::{.incremental}
   1. Dégradation des fluorophores
   2. Accumulation d'erreurs de phase, soit la désynchronisation des clusters
   3. Épuisement des réactifs, compétition pour les nucléotides par exemple
   4. Dommages à l'ADN par stress chimique par exemple
   5. Accumulation de sous-produits (ex. Résidus de réaction s'accumulent)
+:::
+
+---
+
+## Pratique - Analysez vos propres données
+
+:::{.callout-note}
+**Exercice simple**: Utilisez le code R que nous venons de voir pour analyser vos propres fichiers FASTQ
+:::
+
+0. Créer un dossier d'analyse
+1. Placez vos fichiers FASTQ dans sous-dossier `data/`
+2. Exécutez les chunks (le code des diapos) pour analyser la qualité
+3. Comparez les résultats avec les exemples montrés
+4. Bonus: Explorer les autres graphiques dans le package `Rqc`
+
+:::{.callout-tip}
+Si vous n'avez pas de données, vous pouvez télécharger l'exemple [ici](https://github.com/enormandeau/barque_test_dataset/archive/refs/heads/master.zip). Ce sont 10 échantillons de métabarcoding mitofish-12S
+:::
+
+{{< countdown "10:00" >}}
 
 ---
 
@@ -367,15 +389,15 @@ Rqc::rqcCycleQualityPlot(qa)
 
 ## Qu'est ce que BARQUE?
 
-:::: {.columns}
+::: {.columns}
 ::: {.column width="30%"}
 ![](https://raw.githubusercontent.com/enormandeau/barque/master/00_archive/barque_small.png)
 :::
 ::: {.column  width="70%"}
 - Programme écrit par Éric Normandeau (IBIS, ULaval)
 - Disponible sur [Github](https://github.com/enormandeau/barque) depuis 2017
-- C'est un pipeline de traitement de données de séquences 
-- Il agit comme chef d'orchestre d'un ensemble de programme
+- C'est un pipeline de traitement de données de séquences spécialisé sur le *metabarcoding* 
+- Il agit comme chef d'orchestre d'un ensemble de programmes
 :::
 :::
 
@@ -383,7 +405,7 @@ Rqc::rqcCycleQualityPlot(qa)
 
 ## Qu'est ce que BARQUE?
 
-:::: {.columns}
+::: {.columns}
 ::: {.column  width="40%"}
 ![Creative Commons](img/chef_d'orchestre.jpg)
 :::
@@ -396,44 +418,159 @@ Rqc::rqcCycleQualityPlot(qa)
 - **NCBI BLAST**: annotation des séquences
 non-correspondantes
 - Un ensemble de programmes **UNIX** comme `cut`, `sort`, `uniq` etc. qui manipulent des chaînes de caractères ou des nombres
-- **R** & **Pyhton**: Visualisation et synthèse des résultats
+- **R** & **Python**: Visualisation et synthèse des résultats
 :::
 :::
 
 ---
 
+# Les grandes étapes de BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
+
 ## Les grandes étapes de BARQUE 
 
-1. Vérification des fichiers des entrées dans le 
-2. TRIM - Nettoyage/découpage des séquences
-3. MERGE - Fusion des lectures paired-end
-(R1 et R2)
-1. Split Amplicon - Séparation des amplicons
- (TODO ASV vs OTUs)
-1. Retrait des chimères - Détection et
-suppression des séquences chimériques
-1. Assignement taxonomique - Attribution des
- espèces 
+::: {.columns}
+::: {.column width="60%"}
+![](img/barque_pipeline_simple.png)
+:::
+::: {.column  width="40%"}
+Vue d'ensemble du pipeline de métabarcoding
+:::
+:::
+
+---
+
+## Étape 1: Validation du projet
+
+::: {.columns}
+::: {.column width="60%"}
+![](img/barque_pipeline_simple.png)
+:::
+::: {.column  width="40%"}
+- Vérification des fichiers d'entrée
+- Validation de la nomenclature : `SampleID_*_R1_001.fastq.gz`
+- Vérification des logiciels
+- Présence de la base de données correspondante à l'amorce
+:::
+:::
+
+---
+
+## Étape 2: Nettoyage des données
+
+::: {.columns}
+::: {.column width="60%"}
+![](img/barque_pipeline_simple.png)
+:::
+::: {.column  width="40%"}
+- **2a.** Nettoyage des lectures avec Trimmomatic
+  - Suppression des bases de faible qualité 
+  - Découpage selon les paramètres définis
+- **2b.** Retrait des amplicons non-appariés
+:::
+:::
+
+---
+
+## Étape 3: Appariement des lectures
+
+::: {.columns}
+::: {.column width="60%"}
+![](img/barque_pipeline_simple.png)
+:::
+::: {.column  width="40%"}
+- Appariement des amplicons (R1 + R2) avec FLASH
+- Création d'une lecture consensus pour chaque amplicon
+- Amélioration de la qualité globale
+:::
+:::
+
+---
+
+## Étape 4: Séparation des amplicons
+
+::: {.columns}
+::: {.column width="60%"}
+![](img/barque_pipeline_simple.png)
+:::
+::: {.column  width="40%"}
+Pour chaque lecture fusionnée:
+
+- Recherche du primer forward au début
+- Recherche du primer reverse à la fin (complément inverse)
+- Calcul de la distance avec les primers de référence
+- Vérification de la taille d'amplicon attendue
+- **Sortie**: Un fichier par type d'amplicon
+:::
+:::
+
+---
+
+## Étape 5: Retrait des chimères
+
+:::{.incremental}
+- Détection des séquences chimériques avec VSEARCH
+- Suppression des artefacts de PCR
+- Conservation des séquences authentiques
+:::
+
+---
+
+## Étape 6: Assignement taxonomique
+
+:::{.incremental}
+- Attribution des espèces via bases de données correspondantes à l'amorce
+- Utilisation de BOLD (COI), MitoFish (12S), etc.
+- Génération des tables d'occurrence par espèce
+:::
 
 --- 
 
 ## Télécharger BARQUE
 ### Pratique
 
-1. On se
+Télécharger BARQUE en cliquant [sur le lien](https://github.com/enormandeau/barque/archive/refs/heads/master.zip)
+
+Ou en rendant à l'adresse suivante: [https://github.com/enormandeau/barque](https://github.com/enormandeau/barque)
+
+![](img/github-barque-dl.png)
 
 ---
 
 ## Les étapes en tant qu'utilisateur
 
-1. On place les fichiers `fastq.gz` avec la bonne nomenclature dans le dossier
-2. 
+:::{.incremental}
+1. On place les fichiers `fastq.gz` avec la bonne nomenclature dans le dossier `04_data`
+2. On configure les amorces (P3 et P5) utilisées avec le fichier `02_info/primers.csv`  
+3. On ajuste les paramètres du pipeline avec le fichier `02_info/barque_config.sh`
+4. On s'assure que la base de données BOLD est téléchargé si on travaille avec les amorces COI.
+5. On éxecute le pipeline
+:::
+
+. . . 
+
+::: {.callout-tip}
+Si vous voulez réutiliser la configuration du pipeline pour d'autres fois, c'est une bonne pratique de dupliquer le fichier et de le sauvegarder sous un autre nom.   
+:::
 
 ---
 
-## Types de primer
+## Étape 1 - Placer les fichiers dans `04_data`
 
-Test
+On peut faire tout de suite l'étape 1 avec vos données.
+
+::: {.callout-tip}
+Si vous avez pas de données, vous pouvez télécharger celles fournies par Étienne Normandeau, en [cliquant ici](https://github.com/enormandeau/barque_test_dataset/archive/refs/heads/master.zip). Ce sont 10 échantillons de métabarcoding mitofish-12S, chacun.
+:::
+
+---
+
+## Étape 2: Configuration des amorces
+
+
+---
+
+## Étape 2: Configuration des amorces
+
 
 ---
 
@@ -446,7 +583,7 @@ Test
 
 Aller chercher la base de données NCBI pour les primers COI
 
----
+# Utiliser docker pour executer BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
 
 ## Pourquoi utiliser docker
 
@@ -457,9 +594,9 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 
 ---
 
-## Comment docker fonctionne avec -v 
+## Comment docker fonctionne?
 
-Mettre un schéma
+![@Soroosh Nazem](img/docker_kitchen.jpeg)
 
 --- 
 
