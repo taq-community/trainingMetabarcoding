@@ -24,6 +24,8 @@ jobs:
 
       - name: Install R dependencies with renv
         uses: r-lib/actions/setup-renv@v2
+        env:
+          RENV_CONFIG_REPOS_OVERRIDE: "https://cloud.r-project.org"
         
       - uses: actions/checkout@v4
 
