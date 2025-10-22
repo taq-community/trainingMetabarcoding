@@ -40,5 +40,5 @@
 }
 
 .reveal .slide-logo {
-    max-height: 6rem;
+    max-height: 6rem !important;
 }

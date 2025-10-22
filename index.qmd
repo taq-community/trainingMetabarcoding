@@ -507,11 +507,9 @@ Pour chaque lecture fusionnée:
 
 ## Étape 5: Retrait des chimères
 
-:::{.incremental}
 - Détection des séquences chimériques avec VSEARCH
 - Suppression des artefacts de PCR
 - Conservation des séquences authentiques
-:::
 
 ---
 
@@ -566,22 +564,29 @@ Si vous avez pas de données, vous pouvez télécharger celles fournies par Éti
 
 ## Étape 2: Configuration des amorces
 
+On configure les amorces (P3 et P5) utilisées avec le fichier `02_info/primers.csv`  
+
+TODO: Montre le fichier
 
 ---
 
-## Étape 2: Configuration des amorces
+## Étape 3: Ajustements des paramètres du pipeline
 
+On ajuste les paramètres du pipeline avec le fichier `02_info/barque_config.sh`
+
+TODO: Montre le fichier
 
 ---
 
-## Espèces intégré à la base de données par PRIMER
+## Espèces intégré à la base de données par type d'amorces
 
+TODO: Passer en revue les bases de données déjà dans BARQUE
 
 ---
 
 ## COI
 
-Aller chercher la base de données NCBI pour les primers COI
+TODO: Aller chercher la base de données NCBI pour les primers COI
 
 # Utiliser docker pour executer BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
 
@@ -591,84 +596,54 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 
 ![Hakimzadeh et al, 2024](img/Hakimzadeh_et_al_2024-2.png)
 
-
 ---
 
 ## Comment docker fonctionne?
 
+::: {.columns}
+::: {.column width="70%"}
 ![@Soroosh Nazem](img/docker_kitchen.jpeg)
+:::
+::: {.column  width="30%"}
+
+:::
+:::
+
 
 --- 
 
 ## Étape 1. Télécharger l'image docker
 
 
---
+---
 
-## Étape 2. Execute l'image 
+## Étape 2. Executer l'image 
 
 
 ---
 
-<!-- ## Structure du dossier contenant le programme 
+## Étape 3. Executer BARQUE dans l'image docker
 
 
-## 2. Assurance qualité des données de séquençage 
 
-- Fonctionnement du séquenceur Illumina
-- Structure d'un fichier fastQ
-- Manipulation des fichiers fastQ
-- Contrôle qualité des séquences obtenues
+# Extra {background-image="img/bg.jpg" background-opacity="0.3"}
 
-## 3. Assignation taxonomique 
+## Application Shiny
+### Exécuter BARQUE de manière embarqué
 
-- Comment fonctionne l'assignation d'espèces?
-- Étapes du pipeline BARQUE
-- Schéma des opérations sur l'amplicon
+![](img/barque-embarquée.png)
 
-## 4. Exemples pratiques 
+---
 
-- Cas d'étude avec MiFish
-- Cas d'étude avec COI (dernière version)
+## Application Shiny
+### Exécuter BARQUE de manière embarqué
 
-## 5. Outils BARQUE 
+![](img/barque-embarquée-2.png)
 
-- Application Shiny: Exécuter BARQUE
-- Génération de rapports de résultats
+---
 
-# 1. Contexte de l'eDNA dans la recherche {background-color="#40666e"}
+## Rapport: Obtenir le rapport de résultats
 
-## Ascension des données eDNA dans GBIF
+![](img/metabarcoding_report.png)
 
-## Dans les publications scientifiques
-
-# 2. Assurance qualité des données {background-color="#40666e"}
-
-## Assurance qualité du séquenceur Illumina
-
-## Structure d'un fichier fastQ
-
-## Manipuler des fichiers fastQ
-
-## Assurance qualité sur les séquences obtenues
-
-# 3. Assignation taxonomique {background-color="#40666e"}
-
-## Assigner des espèces: comment ça fonctionne?
-
-## Étapes de BARQUE
-
-## Schéma des opérations sur l'amplicon
-
-# 4. Exemples pratiques {background-color="#40666e"}
-
-## 1. Voir avec MiFish
-
-## 2. Voir avec COI (dernière version)
-
-# 5. Outils BARQUE {background-color="#40666e"}
-
-## Application Shiny: Exécuter BARQUE
-
-## Rapport: Obtenir le rapport de résultats -->
 
