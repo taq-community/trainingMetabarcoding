@@ -541,7 +541,7 @@ Les chimères se forment généralement lors de la PCR lorsque :
 ![](img/barque_pipeline_simple.png)
 :::
 ::: {.column  width="40%"}
-- Attribution des espèces via bases de données correspondantes à l'amorce
+- Attribution des espèces via la bases de données correspondante à l'amorce
 - Utilisation de BOLD (COI), MitoFish (12S), etc.
 - Génération des tables d'occurrence par espèce
 :::
@@ -701,8 +701,93 @@ Les bases de données BOLD et SILVA pré-formatées pour BARQUE sont disponibles
 :::{.callout-important}
 **Après téléchargement, renommer le fichier en `silva.fasta.gz`** ou `****.fasta.gz`** et le placer dans `03_databases/`
 :::
+---
 
-On est prêt à executer BARQUE !!
+## Comment VSEARCH assigne la taxonomie?
+
+VSEARCH utilise une approche de **similarité de séquences** basée sur l'alignement global:
+
+:::{.incremental}
+1. **Recherche de similarité**: Chaque séquence inconnue est alignée contre toutes les séquences de la base de données
+2. **Algorithme d'alignement global**: Utilise un algorithme de type Needleman-Wunsch optimisé pour comparer les séquences
+3. **Calcul de score de similarité**: Pourcentage d'identité basé sur les positions qui correspondent (matches)
+4. **Filtrage des résultats**: Application des seuils de qualité (QUERY_COV, MAX_ACCEPTS, MAX_REJECTS)
+5. **Attribution taxonomique**: La séquence est assignée à l'espèce ayant la meilleure correspondance
+:::
+
+---
+
+## Paramètres clés de VSEARCH
+
+Dans le fichier `barque_config.sh`, ces paramètres contrôlent l'assignement:
+
+```bash
+MAX_ACCEPTS=20      # Nombre maximal de correspondances acceptées avant d'arrêter
+MAX_REJECTS=20      # Nombre maximal de rejets avant d'arrêter la recherche
+QUERY_COV=0.6       # Couverture minimale de la requête (60% de la séquence)
+MIN_HIT_LENGTH=100  # Longueur minimale d'alignement pour conserver le résultat
+```
+
+:::{.callout-tip}
+**QUERY_COV=0.6** signifie qu'au moins 60% de votre séquence doit correspondre à une séquence de la base de données pour être considérée comme un match valide
+:::
+
+---
+
+## Exemple d'assignement avec VSEARCH
+
+::: {.columns}
+::: {.column width="50%"}
+**Séquence inconnue:**
+
+```
+ATCGATCGATCGATCG...
+(150 nucléotides)
+```
+
+**Meilleure correspondance dans la base:**
+
+- **Espèce**: *Salmo salar* (Saumon atlantique)
+- **Similarité**: 98.5%
+- **Couverture**: 95%
+:::
+
+::: {.column width="50%"}
+**Critères de validation:**
+
+- Similarité > seuil (généralement 97-99%)
+- Couverture > QUERY_COV (60%)
+- Longueur alignement > MIN_HIT_LENGTH (100 bp)
+- Nombre d'occurrences > MIN_HITS_SAMPLE (10)
+
+**Résultat:**
+L'amplicon est assigné à *Salmo salar* avec un niveau de confiance élevé
+:::
+:::
+
+---
+
+## Gestion des correspondances multiples
+
+Que se passe-t-il si plusieurs espèces ont le même score?
+
+:::{.incremental}
+- **Correspondance unique** (1 hit): Attribution directe à l'espèce
+- **Correspondances multiples** (>1 hits au même score):
+  - BARQUE conserve tous les hits ayant le score maximal
+  - Création d'un fichier séparé pour les hits multiples
+  - L'utilisateur doit décider comment traiter ces ambiguïtés
+- **Aucune correspondance**: La séquence est rapportée comme "non-annotée" et peut être analysée avec BLAST
+:::
+
+:::{.callout-warning}
+Les correspondances multiples peuvent indiquer:
+
+- Des espèces très proches génétiquement
+- Une résolution insuffisante du marqueur génétique
+- Un besoin de validation supplémentaire
+:::
+
 
 # Utiliser docker pour executer BARQUE {background-image="img/bg.jpg" background-opacity="0.3"}
 
