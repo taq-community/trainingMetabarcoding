@@ -609,6 +609,22 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 :::
 :::
 
+---
+
+## Comment docker fonctionne?
+
+::: {.columns}
+::: {.column width="70%"}
+```plain
+
+```
+:::
+::: {.column  width="30%"}
+
+:::
+:::
+
+
 
 --- 
 
@@ -619,6 +635,8 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 
 ## Étape 2. Executer l'image 
 
+- Mount volume du dossier barque nouvelle 
+- Faire un schéma du dossier barque sur le host et de l'environnement qui contient tous les outils
 
 ---
 
@@ -629,9 +647,13 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 # Extra {background-image="img/bg.jpg" background-opacity="0.3"}
 
 ## Application Shiny
+
 ### Exécuter BARQUE de manière embarqué
 
+
 ![](img/barque-embarquée.png)
+
+Application disponible à l'adresse suivante: [https://cloud.taq.info](https://cloud.taq.info), contacter moi pour un accès: steve.vissault@inrs.ca
 
 ---
 
@@ -640,10 +662,60 @@ BARQUE requière plusieurs programmes qui ne sont pas tous compatibles avec l'en
 
 ![](img/barque-embarquée-2.png)
 
+Application disponible à l'adresse suivante: [https://cloud.taq.info](https://cloud.taq.info), contacter moi pour un accès: steve.vissault@inrs.ca
+
+
 ---
 
-## Rapport: Obtenir le rapport de résultats
+## Rapport de metabarcoding
 
+### Obtenir le rapport sur les résultats de BARQUE
+
+
+::: {.columns}
+::: {.column width="60%"}
 ![](img/metabarcoding_report.png)
+:::
+::: {.column  width="40%"}
+- Le rappport est disponible et executable depuis la librairie [barqueReport sur Github](https://github.com/taq-community/barqueReport)
+- Accès à la [documentation](https://taq.info/barqueReport/)
+:::
+:::
 
 
+---
+
+## Rapport de metabarcoding
+### Installation de barqueReport
+
+Vous pouvez installer la version de développement de barqueReport depuis [GitHub](https://github.com/) avec :
+```{r}
+#| echo: true
+#| eval: false
+install.packages("remotes")
+remotes::install_github("taq-community/barqueReport")
+```
+
+---
+
+## Rapport de metabarcoding
+### Générer un rapport de métabarcoding
+
+La fonction principale génère un rapport HTML interactif à partir des résultats du pipeline BARQUE:
+```{r}
+#| echo: true
+#| eval: false
+library(barqueReport)
+
+# Sélection interactive du dossier BARQUE et du fichier de qualité Illumina
+generate_metabarcoding_report(
+  barque_output_folder = file.choose(),  # Sélectionner le dossier de sortie barque
+  samples_ids = c("ST1", "ST2", "ST3", "ST4"),
+  title = "Étude du Lac Supérieur",
+  subtitle = "",
+  author = "Steve Vissault, Julie Couillard & Tuan Ahn To",
+  illumina_quality_file = file.choose(),  # Sélectionner le fichier Quality_Metrics.csv
+  blank_lab = "LAB_BLANK",
+  blank_field = "FIELD_BLANK"
+)
+```
