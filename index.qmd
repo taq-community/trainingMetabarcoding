@@ -583,7 +583,7 @@ Si vous voulez réutiliser la configuration du pipeline pour d'autres fois, c'es
 On peut faire tout de suite l'étape 1 avec vos données.
 
 ::: {.callout-tip}
-Si vous avez pas de données, vous pouvez télécharger celles fournies par Étienne Normandeau, en [cliquant ici](https://github.com/enormandeau/barque_test_dataset/archive/refs/heads/master.zip). Ce sont 10 échantillons de métabarcoding mitofish-12S, chacun.
+Si vous avez pas de données, vous pouvez télécharger celles fournies par Éric Normandeau, en [cliquant ici](https://github.com/enormandeau/barque_test_dataset/archive/refs/heads/master.zip). Ce sont 10 échantillons de métabarcoding mitofish-12S, chacun.
 :::
 
 ---
@@ -709,10 +709,10 @@ VSEARCH utilise une approche de **similarité de séquences** basée sur l'align
 
 :::{.incremental}
 1. **Recherche de similarité**: Chaque séquence inconnue est alignée contre toutes les séquences de la base de données
-2. **Algorithme d'alignement global**: Utilise un algorithme de type Needleman-Wunsch optimisé pour comparer les séquences
+2. **Algorithme d'alignement global**: Utilise un algorithme de type Needleman-Wunsch optimisé pour comparer les séquences (`MAX_ACCEPTS`, `MAX_REJECTS`)
 3. **Calcul de score de similarité**: Pourcentage d'identité basé sur les positions qui correspondent (matches)
-4. **Filtrage des résultats**: Application des seuils de qualité (QUERY_COV, MAX_ACCEPTS, MAX_REJECTS)
-5. **Attribution taxonomique**: La séquence est assignée à l'espèce ayant la meilleure correspondance
+4. **Filtrage des résultats**: Application des seuils de qualité (`QUERY_COV`, `MIN_HIT_LENGTH`)
+5. **Attribution taxonomique**: La séquence est assignée à toutes les espèces ayant un score supérieur au seuil de similarité établie.
 :::
 
 ---
@@ -721,12 +721,20 @@ VSEARCH utilise une approche de **similarité de séquences** basée sur l'align
 
 Dans le fichier `barque_config.sh`, ces paramètres contrôlent l'assignement:
 
+#### Qualité de l'assignation
+
 ```bash
-MAX_ACCEPTS=20      # Nombre maximal de correspondances acceptées avant d'arrêter
-MAX_REJECTS=20      # Nombre maximal de rejets avant d'arrêter la recherche
 QUERY_COV=0.6       # Couverture minimale de la requête (60% de la séquence)
 MIN_HIT_LENGTH=100  # Longueur minimale d'alignement pour conserver le résultat
 ```
+
+#### Profondeur de la recherche
+
+```bash
+MAX_ACCEPTS=20      # Nombre maximal de correspondances acceptées avant d'arrêter
+MAX_REJECTS=20      # Nombre maximal de rejets avant d'arrêter la recherche
+```
+
 
 :::{.callout-tip}
 **QUERY_COV=0.6** signifie qu'au moins 60% de votre séquence doit correspondre à une séquence de la base de données pour être considérée comme un match valide
